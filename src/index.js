@@ -3,7 +3,7 @@ import { Text, StyleSheet, Pressable, View, ImageBackground, Headers } from "rea
 import ReactDOM from "react-dom";
 import shuffle from "shuffle-array";
 
-import { start } from "./Confetti";
+import { start } from "./Components/Confetti";
 
 function Confetti() {
   useEffect(() => {

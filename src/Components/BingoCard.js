@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, Button, StyleSheet } from 'react-native';
+import { Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { start } from "./Confetti";
 
 function Confetti() {
@@ -9,39 +9,15 @@ function Confetti() {
   return <canvas id="canvas" />;
 }
 
-function Tile({ id, children, onToggle, isSet }) {
-  return (
-    <Text style ={styles.tile} onClick={onToggle} className={`tile ${isSet ? "tile--set" : ""}`}>
-      {children}
-    </Text>
-  );
-}
+// function Tile({ id, children, onToggle, isSet }) {
+//   return (
+//     <Text style ={styles.tile} onClick={onToggle} className={`tile ${isSet ? "tile--set" : ""}`}>
+//       {children}
+//     </Text>
+//   );
+// }
 
 const BingoGame = () => {
-  const [bingoCard, setBingoCard] = useState([]);
-
-  const [state, setState] = useState({ checked: {} });
-  const isWon = checked => {
-    const range = [0, 1, 2, 3, 4];
-    return (
-      undefined !==
-        range.find(row => range.every(column => checked[row * 5 + column])) ||
-      undefined !==
-        range.find(column => range.every(row => checked[row * 5 + column])) ||
-        range.every(index => checked[index * 5 + index]) ||
-        range.every(index => checked[index * 5 + 4 - index])
-    );
-  };
-  const toggle = index =>
-    setState(state => {
-      const checked = { ...state.checked, [index]: !state.checked[index] };
-      const won = isWon(checked);
-      return {
-        ...state,
-        checked,
-        won
-      };
-    });
 
   const values = {
     1: '"I know the church is true"',
@@ -80,70 +56,146 @@ const BingoGame = () => {
     34: '"I didnt plan on getting up here today..."'
   };
 
-  const generateCard = () => {
-    let tempCard = [];
-    const valueKeys = Object.keys(values);
-    while (tempCard.length < 25) {
-      const randomIndex = Math.floor(Math.random() * valueKeys.length);
-      const randomValueKey = valueKeys[randomIndex];
-      if (!tempCard.includes(values[randomValueKey])) {
-        tempCard.push(values[randomValueKey]);
+  const [board, setBoard] = useState([
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+  ]);
+  const [color, setColor] = useState({});
+  const [winner, setWinner] = useState(false);
+
+    const checkWinner = () => {
+    // Check rows
+    for (let i = 0; i < 5; i++) {
+      if (board[i][0] && board[i][0][0] === board[i][1][0] && board[i][1][0] === board[i][2][0] && board[i][2][0] === board[i][3][0] && board[i][3][0] === board[i][4][0]) {
+        setWinner(true);
+        return;
       }
     }
-    setBingoCard(tempCard);
-  };
+
+    // Check columns
+    for (let i = 0; i < 5; i++) {
+      if (board[0][i] && board[0][i][0] === board[1][i][0] && board[1][i][0] === board[2][i][0] && board[2][i][0] === board[3][i][0] && board[3][i][0] === board[4][i][0]) {
+        setWinner(true);
+        return;
+      }
+    }
+
+    // Check diagonal from top-left to bottom-right
+    if (board[0][0] && board[0][0][0] === board[1][1][0] && board[1][1][0] === board[2][2][0] && board[2][2][0] === board[3][3][0] && board[3][3][0] === board[4][4][0]) {
+      setWinner(true);
+      return;
+    }
+
+    // Check diagonal from top-right to bottom-left
+    if (board[0][4] && board[0][4][0] === board[1][3][0] && board[1][3][0] === board[2][2][0] && board[2][2][0] === board[3][1][0] && board[3][1][0] === board[4][0][0]) {
+      setWinner(true);
+      return;
+    }
+  }
+
+
+  const generateCard = () => {
+    setWinner(false)
+    const usedNumbers = new Set();
+    const newBoard = [];
+    const valueKeys = Object.keys(values);
+    for (let i = 0; i < 5; i++) {
+      const newRow = [];
+      for (let j = 1; j < 6; j++) {
+        let randomIndex = Math.ceil(Math.random() * valueKeys.length);
+        // Ensure that each number is unique on the board
+        while (usedNumbers.has(randomIndex)) {
+          randomIndex = Math.ceil(Math.random() * valueKeys.length);
+        }
+        
+        usedNumbers.add(randomIndex);
+        if (values[randomIndex] == undefined) {
+          
+          console.log(values[randomIndex])
+          console.log(randomIndex)
+        }
+        newRow.push(values[randomIndex]);
+      }
+
+      newBoard.push(newRow);
+    }
+      // Replace the center cell with a free space
+      newBoard[2][2] = 'Free Space';
+      setBoard(newBoard);
+    }
+
+  const toggleCell = (row, col) => {
+    if (board[row][col][0] != 'X') {
+      const newBoard = [...board];
+      newBoard[row][col] = 'X' + newBoard[row][col];
+      setBoard(newBoard);
+      // setColor(prevState => {
+      //   return {
+      //     ...prevState,
+      //     [row]: prevState[row] === 'red' ? 'white' : 'red'
+      //   }
+      // });
+      checkWinner();
+    }
+  }
 
   return (
     <View style={styles.container}>
-        <Button title="Generate Card" onPress={generateCard} />
-
-        <View style={styles.card}>
-        {bingoCard.map((value, index) => (
-            <View key={index} style={styles.box}>
-                <Text
-                style={styles.number}
-                id={index}
-                isSet={!!state.checked[index]}
-                onToggle={() => toggle(index)}
-                >
-                    {value}
-                </Text>
-            </View>
-        ))}
-        </View>
+      {winner ? (
+        <Text style={styles.result}>Bingo! You won!</Text>
+      ) : (
+        <Text style={styles.result}>Keep playing!</Text>
+      )} 
+      <Button title="New Bingo Card" onPress={generateCard} />
+      <View style={styles.card}>
+        {board.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.box} >
+            {row.map((cell, cellIndex) => (
+              <TouchableOpacity key={`${rowIndex}-${cellIndex}`} style={styles.tile} onPress={() => toggleCell(rowIndex, cellIndex)}>
+                <Text style={styles.number}>{cell}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))} 
+      </View> 
     </View>
   );
 };
 
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    card: {
-      width: 375,
-      height: 375,
-      borderWidth: .5,
-      borderColor: 'black',
-      flexDirection: 'row',
-      flexWrap: 'wrap'
-    },
-    box: {
-      width: '20%',
-      height: '20%',
-      borderWidth: .5,
-      padding: 2,
-      borderColor: 'black',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    number: {
-      fontSize: 9,
-      fontWeight: 'bold'
-    }
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  card: {
+    width: 380,
+    height: 380,
+    flexDirection: 'row',
+    flexWrap: 'wrap'
+  },
+  box: {
+    width: '20%',
+    alignItems: 'center',
+    padding: 2,
+    justifyContent: 'center'
+  },
+  tile: {
+    width: 75,
+    height: '20%',
+    borderWidth: .5,
+    borderColor: 'black',
+    padding: 2
+  },
+  number: {
+    fontSize: 9,
+    fontWeight: 'bold'
+  }
 });
 
 export default BingoGame;
