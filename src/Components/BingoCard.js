@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { start } from "./Confetti";
 
@@ -8,14 +8,6 @@ function Confetti() {
   });
   return <canvas id="canvas" />;
 }
-
-// function Tile({ id, children, onToggle, isSet }) {
-//   return (
-//     <Text style ={styles.tile} onClick={onToggle} className={`tile ${isSet ? "tile--set" : ""}`}>
-//       {children}
-//     </Text>
-//   );
-// }
 
 const BingoGame = () => {
 
@@ -55,7 +47,7 @@ const BingoGame = () => {
     33: 'Unprovoked singing',
     34: '"I didnt plan on getting up here today..."'
   };
-
+  
   const [board, setBoard] = useState([
     ['', '', '', '', ''],
     ['', '', '', '', ''],
@@ -63,42 +55,90 @@ const BingoGame = () => {
     ['', '', '', '', ''],
     ['', '', '', '', ''],
   ]);
-  const [color, setColor] = useState({});
+  const [selectedCells, setSelectedCells] = useState(new Set());
   const [winner, setWinner] = useState(false);
 
-    const checkWinner = () => {
+  useEffect(() => {
+    if (selectedCells.size < 5) {
+      return;
+    }
+
     // Check rows
-    for (let i = 0; i < 5; i++) {
-      if (board[i][0] && board[i][0][0] === board[i][1][0] && board[i][1][0] === board[i][2][0] && board[i][2][0] === board[i][3][0] && board[i][3][0] === board[i][4][0]) {
+    for (let rowIndex = 0; rowIndex < board.length; rowIndex++) {
+      const row = board[rowIndex];
+      let allSelected = true;
+
+      for (let cellIndex = 0; cellIndex < row.length; cellIndex++) {
+        const cellId = `${rowIndex}-${cellIndex}`;
+
+        if (!selectedCells.has(cellId)) {
+          setWinner(false);
+          allSelected = false;
+          break;
+        }
+      }
+
+      if (allSelected) {
         setWinner(true);
         return;
       }
     }
 
     // Check columns
-    for (let i = 0; i < 5; i++) {
-      if (board[0][i] && board[0][i][0] === board[1][i][0] && board[1][i][0] === board[2][i][0] && board[2][i][0] === board[3][i][0] && board[3][i][0] === board[4][i][0]) {
+    for (let cellIndex = 0; cellIndex < board[0].length; cellIndex++) {
+      let allSelected = true;
+
+      for (let rowIndex = 0; rowIndex < board.length; rowIndex++) {
+        const cellId = `${rowIndex}-${cellIndex}`;
+
+        if (!selectedCells.has(cellId)) {
+          setWinner(false);
+          allSelected = false;
+          break;
+        }
+      }
+
+      if (allSelected) {
         setWinner(true);
         return;
       }
     }
 
-    // Check diagonal from top-left to bottom-right
-    if (board[0][0] && board[0][0][0] === board[1][1][0] && board[1][1][0] === board[2][2][0] && board[2][2][0] === board[3][3][0] && board[3][3][0] === board[4][4][0]) {
+    // Check diagonals
+    let diagonal1AllSelected = true;
+    let diagonal2AllSelected = true;
+
+    for (let i = 0; i < board.length; i++) {
+      const diagonal1CellId = `${i}-${i}`;
+      const diagonal2CellId = `${i}-${board.length - i - 1}`;
+
+      if (!selectedCells.has(diagonal1CellId)) {
+        setWinner(false);
+        diagonal1AllSelected = false;
+      }
+
+      if (!selectedCells.has(diagonal2CellId)) {
+        setWinner(false);
+        diagonal2AllSelected = false;
+      }
+    }
+
+    if (diagonal1AllSelected) {
       setWinner(true);
       return;
     }
 
-    // Check diagonal from top-right to bottom-left
-    if (board[0][4] && board[0][4][0] === board[1][3][0] && board[1][3][0] === board[2][2][0] && board[2][2][0] === board[3][1][0] && board[3][1][0] === board[4][0][0]) {
+    if (diagonal2AllSelected) {
       setWinner(true);
       return;
     }
-  }
+
+  }, [selectedCells]);
 
 
   const generateCard = () => {
     setWinner(false)
+    setSelectedCells(new Set())
     const usedNumbers = new Set();
     const newBoard = [];
     const valueKeys = Object.keys(values);
@@ -106,40 +146,32 @@ const BingoGame = () => {
       const newRow = [];
       for (let j = 1; j < 6; j++) {
         let randomIndex = Math.ceil(Math.random() * valueKeys.length);
+
         // Ensure that each number is unique on the board
         while (usedNumbers.has(randomIndex)) {
           randomIndex = Math.ceil(Math.random() * valueKeys.length);
         }
         
         usedNumbers.add(randomIndex);
-        if (values[randomIndex] == undefined) {
-          
-          console.log(values[randomIndex])
-          console.log(randomIndex)
-        }
         newRow.push(values[randomIndex]);
       }
-
       newBoard.push(newRow);
     }
-      // Replace the center cell with a free space
-      newBoard[2][2] = 'Free Space';
-      setBoard(newBoard);
-    }
+    // Replace the center cell with a free space
+    newBoard[2][2] = 'Free Space';
+    setBoard(newBoard);
+  }
 
   const toggleCell = (row, col) => {
-    if (board[row][col][0] != 'X') {
-      const newBoard = [...board];
-      newBoard[row][col] = 'X' + newBoard[row][col];
-      setBoard(newBoard);
-      // setColor(prevState => {
-      //   return {
-      //     ...prevState,
-      //     [row]: prevState[row] === 'red' ? 'white' : 'red'
-      //   }
-      // });
-      checkWinner();
+    const cellId = `${row}-${col}`;
+    const updatedSelectedCells = new Set(selectedCells);
+    //toggle color
+    if (selectedCells.has(cellId)) {
+      updatedSelectedCells.delete(cellId);
+    } else {
+      updatedSelectedCells.add(cellId);
     }
+    setSelectedCells(updatedSelectedCells);
   }
 
   return (
@@ -153,11 +185,15 @@ const BingoGame = () => {
       <View style={styles.card}>
         {board.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.box} >
-            {row.map((cell, cellIndex) => (
-              <TouchableOpacity key={`${rowIndex}-${cellIndex}`} style={styles.tile} onPress={() => toggleCell(rowIndex, cellIndex)}>
-                <Text style={styles.number}>{cell}</Text>
-              </TouchableOpacity>
-            ))}
+            {row.map((cell, cellIndex) => {
+              const isSelected = selectedCells.has(`${rowIndex}-${cellIndex}`);
+              const backgroundColor = isSelected ? '#00ff00' : '#ffffff';
+              return (
+                <TouchableOpacity key={`${rowIndex}-${cellIndex}`} style={styles.tile} onPress={() => toggleCell(rowIndex, cellIndex)}>
+                  <Text style={[styles.number, { backgroundColor }]}>{cell}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         ))} 
       </View> 
