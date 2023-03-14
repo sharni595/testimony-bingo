@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Canvas from 'react-native-canvas';
 import { Start } from "./Confetti";
 
@@ -168,11 +168,10 @@ const BingoGame = () => {
   return (
     <View style={styles.container}>
       {winner ? (
-        <Text style={styles.result}>Bingo! You won!</Text>
+        <Image style={styles.result} source={require('../../assets/bingo.png')} />
       ) : (
-        <Text style={styles.result}>Keep playing!</Text>
+        <Text style={styles.result}></Text>
       )} 
-      <Button title="New Bingo Card" onPress={generateCard} />
       <View style={styles.card}>
         {board.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.box} >
@@ -189,6 +188,9 @@ const BingoGame = () => {
           </View>
         ))} 
       </View> 
+      <TouchableOpacity style={styles.button} onPress={generateCard}>
+        <Image style={{height: 40, width: 120}} source={require('../../assets/newcard.png')} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -199,6 +201,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#7cb3bd',
+  },
+  result: {
+    position: 'absolute',
+    top: 80,
+  },
+  button: {
+    backgroundColor: '#df964a',
+    borderRadius: 50,
+    padding: 10,
+    position: 'absolute',
+    bottom: 100
   },
   card: {
     width: 380,
@@ -208,14 +222,15 @@ const styles = StyleSheet.create({
   tile: {
     width: 75,
     height: '20%',
-    borderWidth: .5,
-    borderColor: 'black',
-    borderStyle: 'dashed',
+    borderWidth: 2,
+    borderColor: '#df964a',
+    borderStyle: 'dotted',
     borderRadius: 10,
     padding: 2,
     margin: .75,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#ffffff'
   },
   number: {
     fontSize: 9.5,
@@ -223,10 +238,10 @@ const styles = StyleSheet.create({
   },
   circle: {
     position:'absolute',
-    borderWidth: 1,
-    borderColor: 'rgba(192, 215, 187,0.5)',
+    borderWidth: 3,
+    borderColor: 'rgba(192, 215, 187,0.2)',
     borderRadius: 50,
-    backgroundColor: 'rgba(192, 215, 187,0.5)',
+    backgroundColor: 'rgba(192, 215, 187,0.6)',
     width: 60,
     height: 60,
     textAlign: 'center',

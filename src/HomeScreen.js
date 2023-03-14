@@ -1,49 +1,47 @@
 import { StatusBar } from 'expo-status-bar';
 import React from "react";
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ImageBackground } from 'react-native';
 import { NavigationContext } from "react-navigation";
 //import { generateCard } from './Components/BingoCard'
+
+const image = './assets/homepage.png'
 
 const HomeScreen = ({ navigation }) => {
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>Testimony Bingo</Text>
-        <View style ={styles.buttonContainer}>
-          <Pressable onPress={() => {
-            navigation.navigate('Bingo');
-          }}
-          style={styles.button}>
-            <Text>Let's Play</Text>
-          </Pressable>
-        </View>
+        <ImageBackground source={require('../assets/homepage.png')} resizeMode="cover" style={styles.image}>
+          <View style={styles.buttonContainer}>
+            <Pressable onPress={() => {
+              navigation.navigate('Bingo');
+            }}
+            style={styles.button}>
+            </Pressable>
+          </View>
+        </ImageBackground>
       </View>
     )
-}
+  }
 
 const styles = StyleSheet.create({ 
-container: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#D0FFD6'
-},
-header: {
-    textAlign: 'center',
-    fontSize: 40,
-    fontFamily: 'Avenir-Book'
-},
-buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-},
-button: {
+  container: {
+      flex: 1,
+  },
+  buttonContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+  button: {
     position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#D5E2BC',
+    width: '60%',
+    height: '25%',
+    marginTop: 50,
     padding: 20
-}
+  },
+  image: {
+      flex: 1,
+      justifyContent: 'center',
+  },
 });
 
 export default HomeScreen;
