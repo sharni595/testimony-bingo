@@ -1,7 +1,9 @@
-export function start() {
+import React from "react";
+
+const Start = () => {
     let W = window.innerWidth;
     let H = window.innerHeight;
-    const canvas = document.getElementById("canvas");
+    const canvas = this.ref.current;;
     const context = canvas.getContext("2d");
     const maxConfettis = 150;
     const particles = [];
@@ -104,3 +106,4 @@ export function start() {
     Draw();
 }
     
+export default Start;

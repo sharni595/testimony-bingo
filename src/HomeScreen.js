@@ -2,13 +2,16 @@ import { StatusBar } from 'expo-status-bar';
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { NavigationContext } from "react-navigation";
+//import { generateCard } from './Components/BingoCard'
 
 const HomeScreen = ({ navigation }) => {
     return (
       <View style={styles.container}>
         <Text style={styles.header}>Testimony Bingo</Text>
         <View style ={styles.buttonContainer}>
-          <Pressable onPress={() => navigation.navigate('Bingo')}
+          <Pressable onPress={() => {
+            navigation.navigate('Bingo');
+          }}
           style={styles.button}>
             <Text>Let's Play</Text>
           </Pressable>
